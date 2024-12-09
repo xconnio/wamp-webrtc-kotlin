@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "io.xconn.wampwebrtc"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "io.xconn.wampwebrtc"
@@ -42,4 +42,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation("io.xconn:xconn:0.1.0-alpha.4")
+    implementation("io.xconn:wampproto:0.1.1")
+    implementation("io.getstream:stream-webrtc-android:1.2.2")
 }
