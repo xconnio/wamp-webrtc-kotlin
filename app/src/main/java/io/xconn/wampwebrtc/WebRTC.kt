@@ -7,21 +7,28 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
 import java.util.UUID
 import java.util.concurrent.LinkedBlockingDeque
 
-class WebRTC(private val context: Context, private val queue: LinkedBlockingDeque<ByteArray>) {
+class WebRTC(
+    private val context: Context,
+    private val queue: LinkedBlockingDeque<ByteArray>,
+) {
     suspend fun connect(config: ClientConfig): WebRTCSession {
         val client = Client(serializer = CBORSerializer())
         val session = client.connect(config.url, config.realm)
 
         val requestID = UUID.randomUUID().toString()
-        val offerConfig = OfferConfig(
-            config.subProtocol, config.iceServers, true, 1, config.topicAnswererOnCandidate
-        )
+        val offerConfig =
+            OfferConfig(
+                config.subProtocol,
+                config.iceServers,
+                true,
+                1,
+                config.topicAnswererOnCandidate,
+            )
 
         val candidates: MutableList<IceCandidate> = mutableListOf()
         val offerer =

@@ -4,8 +4,9 @@ import android.content.Context
 import io.xconn.xconn.Session
 import java.util.concurrent.LinkedBlockingDeque
 
-class WAMPSession(private val context: Context) {
-
+class WAMPSession(
+    private val context: Context,
+) {
     suspend fun connect(config: ClientConfig): Session {
         val queue = LinkedBlockingDeque<ByteArray>()
         val webRTCConnection = WebRTC(context, queue)

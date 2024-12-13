@@ -16,7 +16,11 @@ fun convertJsonToMap(jsonString: String): Map<String, Any> {
     return map
 }
 
-suspend fun join(peer: Peer, realm: String, serializer: Serializer): PeerBaseSession {
+suspend fun join(
+    peer: Peer,
+    realm: String,
+    serializer: Serializer,
+): PeerBaseSession {
     val joiner = Joiner(realm, serializer)
     val hello = joiner.sendHello()
 
