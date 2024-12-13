@@ -68,4 +68,7 @@ data class OfferConfig(
     val topicAnswererOnCandidate: String,
 )
 
-data class WebRTCSession(val connection: PeerConnection, val channel: DataChannel)
+data class WebRTCSession(
+    val connection: PeerConnection,
+    val channel: DataChannel,
+)

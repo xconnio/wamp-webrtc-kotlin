@@ -19,17 +19,18 @@ class MessageAssembler {
         }
     }
 
-    fun chunkMessage(message: ByteArray): Sequence<ByteArray> = sequence {
-        val chunkSize = 16 * 1024 - 1 // 16KB - 1 byte for metadata
-        val totalChunks = (message.size + chunkSize - 1) / chunkSize
+    fun chunkMessage(message: ByteArray): Sequence<ByteArray> =
+        sequence {
+            val chunkSize = 16 * 1024 - 1 // 16KB - 1 byte for metadata
+            val totalChunks = (message.size + chunkSize - 1) / chunkSize
 
-        for (i in 0 until totalChunks) {
-            val start = i * chunkSize
-            val end = if (i == totalChunks - 1) message.size else start + chunkSize
-            val chunk = message.copyOfRange(start, end)
+            for (i in 0 until totalChunks) {
+                val start = i * chunkSize
+                val end = if (i == totalChunks - 1) message.size else start + chunkSize
+                val chunk = message.copyOfRange(start, end)
 
-            val isFinal = if (i == totalChunks - 1) 1.toByte() else 0.toByte()
-            yield(byteArrayOf(isFinal) + chunk)
+                val isFinal = if (i == totalChunks - 1) 1.toByte() else 0.toByte()
+                yield(byteArrayOf(isFinal) + chunk)
+            }
         }
-    }
 }
