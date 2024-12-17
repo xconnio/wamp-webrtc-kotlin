@@ -55,6 +55,7 @@ data class ClientConfig(
     val realm: String,
     val procedureWebRTCOffer: String,
     val topicAnswererOnCandidate: String,
+    val topicOffererOnCandidate: String,
     val serializer: Serializer,
     val subProtocol: String,
     val iceServers: List<IceServer>,
