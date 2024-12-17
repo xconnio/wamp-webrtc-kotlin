@@ -1,6 +1,8 @@
 package io.xconn.wampwebrtc
 
 import android.content.Context
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -30,6 +32,8 @@ class Offerer(
     var dataChannel: DataChannel? = null
     val peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory()
     private var assembler = MessageAssembler()
+    private var onDataChannelOpen: (() -> Unit)? = null
+    private var dataChannelTimeoutMillis: Long = 20000
 
     suspend fun createOffer(offerConfig: OfferConfig): SessionDescription? {
         val configuration = PeerConnection.RTCConfiguration(offerConfig.iceServers)
@@ -45,17 +49,7 @@ class Offerer(
                         }
                     }
 
-                    override fun onDataChannel(channel: DataChannel?) {
-                        channel?.registerObserver(
-                            object : DataChannel.Observer {
-                                override fun onMessage(buffer: DataChannel.Buffer?) {}
-
-                                override fun onBufferedAmountChange(p0: Long) {}
-
-                                override fun onStateChange() {}
-                            },
-                        )
-                    }
+                    override fun onDataChannel(channel: DataChannel?) {}
 
                     override fun onSignalingChange(p0: PeerConnection.SignalingState?) {}
 
@@ -83,6 +77,29 @@ class Offerer(
                 protocol = offerConfig.protocol
             }
         dataChannel = peerConnection?.createDataChannel("wamp", conf)
+        dataChannel?.registerObserver(
+            object : DataChannel.Observer {
+                override fun onStateChange() {
+                    if (dataChannel?.state() == DataChannel.State.OPEN) {
+                        onDataChannelOpen?.invoke()
+                    }
+                }
+
+                override fun onBufferedAmountChange(p0: Long) {}
+
+                override fun onMessage(buffer: DataChannel.Buffer?) {
+                    buffer?.data?.let {
+                        val data = ByteArray(it.remaining())
+                        it.get(data)
+
+                        val message = assembler.feed(data)
+                        if (message != null) {
+                            queue.put(message)
+                        }
+                    }
+                }
+            },
+        )
 
         return suspendCoroutine { continuation ->
             peerConnection?.createOffer(
@@ -115,32 +132,14 @@ class Offerer(
         }
     }
 
-    suspend fun waitForDataChannelOpen(): Unit =
-        suspendCoroutine { continuation ->
-            dataChannel?.registerObserver(
-                object : DataChannel.Observer {
-                    override fun onStateChange() {
-                        if (dataChannel?.state() == DataChannel.State.OPEN) {
-                            continuation.resume(Unit)
-                        }
-                    }
-
-                    override fun onBufferedAmountChange(p0: Long) {}
-
-                    override fun onMessage(buffer: DataChannel.Buffer?) {
-                        buffer?.data?.let {
-                            val data = ByteArray(it.remaining())
-                            it.get(data)
-
-                            val message = assembler.feed(data)
-                            if (message != null) {
-                                queue.put(message)
-                            }
-                        }
-                    }
-                },
-            )
-        }
+    suspend fun waitForDataChannelToOpen() {
+        withTimeoutOrNull(dataChannelTimeoutMillis) {
+            while (true) {
+                if (dataChannel?.state() == DataChannel.State.OPEN) return@withTimeoutOrNull
+                delay(100)
+            }
+        } ?: throw IllegalStateException("Data channel failed to open within $dataChannelTimeoutMillis milliseconds")
+    }
 
     fun setRemoteDescription(sessionDescription: SessionDescription) {
         peerConnection?.setRemoteDescription(
