@@ -13,7 +13,7 @@ class WAMPSession(
         val webRTCSession = webRTCConnection.connect(config)
 
         val peer = WebRTCPeer(webRTCSession.channel, config.serializer, queue)
-        val baseSession = join(peer, config.realm, config.serializer)
+        val baseSession = join(peer, config)
 
         return Session(baseSession)
     }

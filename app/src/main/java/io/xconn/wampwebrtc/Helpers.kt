@@ -1,7 +1,6 @@
 package io.xconn.wampwebrtc
 
 import io.xconn.wampproto.Joiner
-import io.xconn.wampproto.serializers.Serializer
 import org.json.JSONObject
 
 fun convertJsonToMap(jsonString: String): Map<String, Any> {
@@ -18,10 +17,9 @@ fun convertJsonToMap(jsonString: String): Map<String, Any> {
 
 suspend fun join(
     peer: Peer,
-    realm: String,
-    serializer: Serializer,
+    config: ClientConfig,
 ): PeerBaseSession {
-    val joiner = Joiner(realm, serializer)
+    val joiner = Joiner(config.realm, config.serializer, config.authenticator)
     val hello = joiner.sendHello()
 
     peer.send(hello as ByteArray)
@@ -32,7 +30,7 @@ suspend fun join(
 
         if (toSend == null) {
             val sessionDetails = joiner.getSessionDetails()
-            val base = PeerBaseSession(peer, sessionDetails, serializer)
+            val base = PeerBaseSession(peer, sessionDetails, config.serializer)
             return base
         }
 

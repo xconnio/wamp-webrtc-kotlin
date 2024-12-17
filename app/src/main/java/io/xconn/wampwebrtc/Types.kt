@@ -1,6 +1,7 @@
 package io.xconn.wampwebrtc
 
 import io.xconn.wampproto.SessionDetails
+import io.xconn.wampproto.auth.ClientAuthenticator
 import io.xconn.wampproto.messages.Message
 import io.xconn.wampproto.serializers.Serializer
 import io.xconn.xconn.IBaseSession
@@ -59,6 +60,7 @@ data class ClientConfig(
     val serializer: Serializer,
     val subProtocol: String,
     val iceServers: List<IceServer>,
+    val authenticator: ClientAuthenticator,
 )
 
 data class OfferConfig(
