@@ -54,8 +54,8 @@ data class ClientConfig(
     val url: String,
     val realm: String,
     val procedureWebRTCOffer: String,
-    val topicAnswererOnCandidate: String,
-    val topicOffererOnCandidate: String,
+    val topicAnswererOnCandidates: String,
+    val topicOffererOnCandidates: String,
     val serializer: Serializer,
     val subProtocol: String,
     val iceServers: List<IceServer>,
@@ -66,7 +66,7 @@ data class OfferConfig(
     val iceServers: List<IceServer>,
     val ordered: Boolean,
     val id: Int,
-    val topicAnswererOnCandidate: String,
+    val topicAnswererOnCandidates: String,
 )
 
 data class WebRTCSession(
